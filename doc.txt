@@ -1,0 +1,55 @@
+The Proof of Concept (POC) serves as a preliminary phase in the development process, aimed at demonstrating the feasibility and functionality of the proposed system. It allows stakeholders to validate concepts, test assumptions, and identify potential challenges before full-scale implementation. In this project, the POC focuses on designing and implementing the Input, Processing, and Reporting layers for handling data, with the current emphasis on the Input Layer.
+
+Input Layer Process for Agreement Feed:
+
+In the Input Layer process for the Agreement Feed, the main objective is to collect data effectively, ensure its quality, and prepare it for further processing and analysis. This involves the following tasks:
+
+Data Collecting: Arun and Yash are responsible for collecting data from the Agreement Feed, which consists of files containing relevant information.
+
+UI Design: Arun and Yash collaborate on designing the user interface (UI) for the Input Layer. The UI design should focus on intuitive navigation and efficient data input mechanisms.
+
+UI Process: Arun and Yash work together to implement the UI processes, ensuring seamless data entry and interaction with the system.
+
+Data Quality Check: Arun and Yash conduct thorough data quality checks to identify any inconsistencies, errors, or missing values in the Agreement Feed data.
+
+Data Analysis: Arun and Yash analyze the Agreement Feed data to derive meaningful insights and identify patterns or trends.
+
+Visualizations: Arun and Yash create visualizations based on the analyzed data to present key findings and facilitate understanding.
+
+Timeline:
+
+Data Collecting, UI Design, and UI Process: 1 week
+Data Quality Check: 2 days
+Data Analysis and Visualizations: 1 week
+By adhering to this timeline, we aim to efficiently complete the Input Layer process for the Agreement Feed, ensuring that the data is collected, processed, and analyzed accurately and within the specified time frame.
+
+
+Data Collecting: Arun and Yash are responsible for collecting data from the Agreement Feed, which consists of files containing relevant information.
+
+UI Design: Arun and Yash collaborate on designing the user interface (UI) for the Input Layer. The UI design should focus on intuitive navigation and efficient data input mechanisms.
+
+UI Process: Arun and Yash work together to implement the UI processes, ensuring seamless data entry and interaction with the system.
+
+Data Quality Check: Arun and Yash conduct thorough data quality checks to identify any inconsistencies, errors, or missing values in the Agreement Feed data.
+
+Data Analysis: Arun and Yash analyze the Agreement Feed data to derive meaningful insights and identify patterns or trends.
+
+Visualizations: Arun and Yash create visualizations based on the analyzed data to present key findings and facilitate understanding.
+
+give it tabular way 
+ChatGPT
+Certainly! Here's the breakdown of responsibilities in a tabular format:
+
+Task	Assigned To
+Data Collecting	Arun, Yash
+UI Design	Arun, Yash
+UI Process	Arun, Yash
+Data Quality Check	Arun, Yash
+Data Analysis	Arun, Yash
+Visualizations	Arun, Yash
+This table clearly outlines the tasks assigned to Arun and Yash for the Input Layer process of the Agreement Feed.
+
+
+
+
+
