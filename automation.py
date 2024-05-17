@@ -18,9 +18,13 @@ def search_variable_usage(folder_path, variable_names):
     print(f"Searching in folder: {folder_path}")
 
     for root, dirs, files in os.walk(folder_path):
+        print(f"Exploring: {root}")
+        print(f"Directories: {dirs}")
+        print(f"Files: {files}")
         for file_name in files:
             if file_name.endswith('.py') or file_name.endswith('.sql'):
                 file_path = os.path.join(root, file_name)
+                print(f"Processing file: {file_path}")
                 try:
                     with open(file_path, 'r') as file:
                         lines = file.readlines()
@@ -66,6 +70,8 @@ if __name__ == "__main__":
 
     # Derive the directory containing the current script
     script_directory = os.path.dirname(current_script_path)
+
+    print(f"Derived script directory: {script_directory}")
 
     # Ensure the script directory exists
     if not os.path.exists(script_directory):
