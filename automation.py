@@ -2,10 +2,15 @@ import os
 import re
 import csv
 
+def get_current_script_path():
+    # Get the current script's full path
+    script_path = os.path.abspath(__file__)
+    print(f"The full path of the currently executing script is: {script_path}")
+    return script_path
+
 def search_variable_usage(folder_path, variable_names):
     results = []
 
-    # Check if the folder path exists
     if not os.path.exists(folder_path):
         print(f"Error: The path {folder_path} does not exist.")
         return results
@@ -13,9 +18,6 @@ def search_variable_usage(folder_path, variable_names):
     print(f"Searching in folder: {folder_path}")
 
     for root, dirs, files in os.walk(folder_path):
-        print(f"Exploring: {root}")
-        print(f"Directories: {dirs}")
-        print(f"Files: {files}")
         for file_name in files:
             if file_name.endswith('.py') or file_name.endswith('.sql'):
                 file_path = os.path.join(root, file_name)
@@ -59,21 +61,26 @@ def write_results_to_csv(results, output_file):
             writer.writerow({'scriptpath': result[0], 'column_name': result[1], 'impact_area': result[2], 'linenumber': result[3]})
 
 if __name__ == "__main__":
-    # Prompt the user for the cloud-based folder path
-    given_directory = input("Enter the cloud-based folder path: ")  # Example: /mnt/cloud_storage/project_folder
+    # Get the path of the currently executing script
+    current_script_path = get_current_script_path()
 
-    # Check if the given directory exists
-    if not os.path.exists(given_directory):
-        print(f"Error: The path {given_directory} does not exist or is not accessible.")
+    # Derive the directory containing the current script
+    script_directory = os.path.dirname(current_script_path)
+
+    # Ensure the script directory exists
+    if not os.path.exists(script_directory):
+        print(f"Error: The path {script_directory} does not exist or is not accessible.")
     else:
         # Specify the variable names to search for
         variable_names = ['gl_account', 'company', 'costcenter']  # Add more variable names if needed
 
-        # Prompt the user for the output file path
-        output_file = input("Enter the output CSV file path: ")
+        # Specify the output CSV file path
+        output_file = os.path.join(script_directory, "output.csv")
 
-        # Search for variable usage in Python and SQL files within the specified directory
-        results = search_variable_usage(given_directory, variable_names)
+        # Search for variable usage in Python and SQL files within the script directory
+        results = search_variable_usage(script_directory, variable_names)
 
         # Write the results to a CSV file
         write_results_to_csv(results, output_file)
+
+        print(f"Results written to {output_file}")
