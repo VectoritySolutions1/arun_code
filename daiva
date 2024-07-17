@@ -79,3 +79,56 @@ def update_ag_grid_on_submit(query_n_clicks, filter_n_clicks, join_n_clicks,
         return row_data, column_defs
 
     return dash.no_update, dash.no_update
+
+
+import re
+import pandas as pd
+
+def extract_aliases(query):
+    # Pattern to find the alias and the starting position of the source table
+    alias_pattern = re.compile(r"(\w+)\s+AS\s+\(", re.IGNORECASE)
+    
+    matches = alias_pattern.finditer(query)
+    
+    aliases = {}
+    
+    for match in matches:
+        alias = match.group(1)
+        start = match.end()
+        
+        # Use a stack to find the corresponding closing parenthesis
+        stack = 1
+        end = start
+        while stack > 0 and end < len(query):
+            if query[end] == '(':
+                stack += 1
+            elif query[end] == ')':
+                stack -= 1
+            end += 1
+        
+        source = query[start:end-1].strip()
+        aliases[alias] = source
+    
+    return aliases
+
+def extract_tables(source_query):
+    # Regex patterns to find tables in FROM, JOIN, and INNER JOIN clauses
+    from_pattern = re.compile(r"\bFROM\s+(\w+)", re.IGNORECASE)
+    join_pattern = re.compile(r"\bJOIN\s+(\w+)", re.IGNORECASE)
+    
+    tables = []
+    tables.extend(from_pattern.findall(source_query))
+    tables.extend(join_pattern.findall(source_query))
+    
+    return tables
+
+def create_dataframe(aliases):
+    data = []
+    
+    for alias, source_query in aliases.items():
+        tables = extract_tables(source_query)
+        for table in tables:
+            data.append({'alias_name': alias, 'source_table': table})
+    
+    df = pd.DataFrame(data)
+    return df
