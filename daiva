@@ -132,3 +132,17 @@ def create_dataframe(aliases):
     
     df = pd.DataFrame(data)
     return df
+
+@app.route('/execute_python', methods=['POST'])
+def execute_python():
+    
+    code = request.json.get('code')
+    print(code)
+    try:
+        exec_globals = {}
+        exec(code, exec_globals)
+        result = exec_globals.get('result', 'No result returned')
+        print(result)
+    except Exception as e:
+        result = str(e)
+    return jsonify({'result': result})
