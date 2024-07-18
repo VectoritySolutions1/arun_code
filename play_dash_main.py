@@ -22,6 +22,8 @@ from test_api import get_code
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
+
+
 def get_tables():
     query = "SELECT table_name AS name FROM information_schema.tables WHERE table_schema = 'playwithcode';"
     df = pd.read_sql(query, conn)
@@ -131,6 +133,7 @@ horizontal_navbar = html.Div(
     ],
     id="navbar-container"
 )
+
 sub_navbar = html.Div(
     className="sub-navbar",
     style={'background-color': '#508C9B', 'height': '2.5rem', 'width': '100%', 'display': 'flex', 'align-items': 'center'},
@@ -162,6 +165,7 @@ sub_navbar = html.Div(
                                         ),
                                     ]
                                 ),
+                                
                             ]
                         )
                     ]
@@ -170,6 +174,40 @@ sub_navbar = html.Div(
         )
     ]
 )
+
+# chat_bot = html.Div([
+#     html.Div(
+#         className="tpbot-icon",
+#         style={'position': 'fixed', 'bottom': '100px', 'right': '20px', 'z-index': '1000'},
+#         children=[
+#             html.A(
+#                 id='tpbot-link',
+#                 href="#",
+#                 className="nav-link btn btn-warning",
+#                 children=[
+#                     html.Img(src="/assets/image.png", height="30px", className="rounded-circle", style={'margin-right': '10px'}),  # Circular Image
+#                 ],
+#                 style={'color': '#ffffff', 'text-decoration': 'none', 'padding': '10px 15px'}
+#             ),
+#         ]
+#     ),
+    
+#     # Chat card component
+#     dbc.Card(
+#         id='chat-card',
+#         style={'position': 'fixed', 'bottom': '90px', 'right': '20px', 'width': '300px', 'border': '1px solid #ccc', 'backgroundColor': '#f9f9f9', 'boxShadow': '0 4px 8px rgba(0,0,0,0.1)'},
+#         children=[
+#             dbc.CardHeader("Chat with TPBot", style={'backgroundColor': '#EF5A6F', 'color': '#fff'}),
+#             dbc.CardBody(id='chat-content', style={'overflowY': 'scroll', 'maxHeight': '300px', 'backgroundColor': '#FFF1DB'}),
+#             dbc.CardFooter(
+#                 dbc.Input(id='user-input', placeholder='Type your message and press Enter', type='text', style={'width': '100%'})
+#             )
+#         ]
+#     ),
+
+  
+# ])
+
 
 
 
@@ -197,6 +235,39 @@ app.layout = html.Div([
     html.Div(horizontal_navbar),
     html.Div(sub_navbar),
     html.Div(content),
+    html.Div(
+        id='tpbot-icon',
+        style={'position': 'fixed', 'bottom': '90px', 'right': '20px', 'z-index': '1000'},
+        children=[
+            html.A(
+                id='tpbot-link',
+                href="#",
+                className="nav-link btn btn-warning",
+                children=[
+                    html.Img(src="/assets/image.png", height="50px", className="rounded-circle", style={'margin-right': '10px'}),  # Circular Image
+                ],
+                style={'color': '#ffffff', 'text-decoration': 'none', 'padding': '10px 15px'}
+            ),
+        ]
+    ),
+
+    # Chat card component (hidden by default)
+      dbc.Card(
+        id='chat-card',
+        style={'display': 'none', 'position': 'fixed', 'bottom': '20px', 'right': '20px', 'width': '10cm', 'height': '10cm', 'border': '1px solid #ccc', 'backgroundColor': '#f9f9f9', 'boxShadow': '0 4px 8px rgba(0,0,0,0.1)', 'overflow': 'hidden'},
+        children=[
+            dbc.CardHeader("Chat with TPBot", style={'backgroundColor': '#EF5A6F', 'color': '#fff', 'height': '1cm', 'textAlign': 'center', 'lineHeight': '1cm'}),  # Header color
+            dbc.CardBody(
+                dbc.ListGroup(id='chat-content', style={'overflowY': 'auto', 'backgroundColor': '#FFF1DB', 'padding': '10px', 'height': '8cm'}),
+                style={'height': '8cm', 'backgroundColor': '#FFF1DB'}
+            ),  # Body color
+            dbc.Input(id='user-input', placeholder='Type your message and press Enter', type='text', style={'width': '100%', 'margin-top': '10px', 'borderRadius': '8px', 'height': '1cm'}),
+            dbc.CardFooter(
+                dbc.Button("Close", id="close-button", color="secondary", size="sm", className="mr-1"),
+                style={'backgroundColor': '#536493', 'color': 'white', 'textAlign': 'center', 'height': '1cm', 'lineHeight': '1cm'}
+            )
+        ]
+    ),
 ])
 
 # Callback to toggle collapse on sub-menu items
@@ -707,8 +778,54 @@ def execute_code(n_clicks, code):
 
 
 
+bot_responses = {
+    "hi": "Hi, how can I assist you today?",
+    "hello": "Hello there! How can I help?",
+    "goodbye": "Goodbye! Have a great day!",
+    "help": "Sure, I'm here to help. What do you need?",
+}
 
+# Callback to toggle the chat card visibility and handle user input
+@app.callback(
+    Output('chat-card', 'style'),
+    [Input('tpbot-link', 'n_clicks')],
+    [State('chat-card', 'style')],
+    prevent_initial_call=True
+)
+def toggle_chat_card(n_clicks, chat_card_style):
+    if n_clicks is not None and n_clicks % 2 == 1:
+        chat_card_style['display'] = 'block'
+    else:
+        chat_card_style['display'] = 'none'
+    return chat_card_style
 
+# Callback to update chat content and handle bot responses
+@app.callback(
+    Output('chat-content', 'children'),
+    [Input('user-input', 'n_submit')],
+    [State('user-input', 'value'), State('chat-content', 'children')],
+    prevent_initial_call=True
+)
+def update_chat_content(n_submit, user_input, chat_content):
+    if not chat_content:  # Initialize chat_content if it's None or empty
+        chat_content = []
+    
+    if user_input:
+        user_message = user_input.lower().strip()
+        if user_message in bot_responses:
+            bot_message = bot_responses[user_message]
+        else:
+            bot_message = "I'm sorry, I didn't understand that."
+        
+        # Add user message
+        new_user_message = dbc.ListGroupItem(f"You: {user_input}", color="info", className="mb-1")
+        chat_content.append(new_user_message)
+        
+        # Add bot response
+        new_bot_message = dbc.ListGroupItem(f"Bot: {bot_message}", className="mb-1")
+        chat_content.append(new_bot_message)
+    
+    return chat_content
 
 
 
