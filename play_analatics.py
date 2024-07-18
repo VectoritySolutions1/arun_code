@@ -204,7 +204,30 @@ cardtable = html.Div([
             dbc.Button("Close", id="close-query-button", className="ml-auto")
         ]),
     ], id="query-modal", size="lg"),
-    join_modal  # Placeholder for join_modal
+    join_modal,  # Placeholder for join_modal
+    dbc.Offcanvas(
+        [
+            dcc.Textarea(
+                id='code-editor',
+                style={
+                    'width': '100%',
+                    'height': '300px',
+                    'backgroundColor': '#2d2d2d',
+                    'color': '#f8f8f2',
+                    'fontFamily': 'monospace',
+                    'padding': '10px',
+                    'borderRadius': '5px',
+                    'border': 'none'
+                },
+                placeholder='Write your code here...'
+            ),
+            dbc.Button("Execute", id="execute-button", color="primary", className="mt-2"),
+            html.Div(id="output-div", className="mt-2", style={'whiteSpace': 'pre-wrap'})
+        ],
+        id="offcanvas",
+        title="Code Editor",
+        is_open=False,
+    )
 ])
 
 
