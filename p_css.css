@@ -36,7 +36,7 @@
     align-items: center;
     justify-content: center;
     padding: 12px 15px;
-    color: #64c5b1;
+    color: #64c5b1; 
     text-decoration: none;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .navbar {
-    background-color: #64c5b1;
+    background-color:#134B70;
 }
 
 .nav-link span {
@@ -115,7 +115,24 @@
 
 .ag-center-cols-clipper {
     min-height: unset !important;
+    
 }
+
+
+.sub-navbar {
+    display: flex;
+    align-items: center;
+}
+
+.sub-navbar .col:first-child {
+    flex: 1; /* Adjusts the width of the first column */
+}
+
+.sub-navbar .col:last-child {
+    display: flex;
+    justify-content: flex-end; /* Aligns the items to the right */
+}
+
 
 
 
