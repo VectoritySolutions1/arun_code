@@ -43,7 +43,7 @@ sidebar = eval(sidebar_data)
 # Define the horizontal navbar layout
 horizontal_navbar = html.Div(
     className="navbar",
-    style={'padding': '20px 0', 'background-color': '#', 'height': '5rem', 'marginBottom': '3rem'},
+    style={'padding': '20px 0', 'background-color': '#134B70', 'height': '5rem', 'marginBottom': '3rem'},
     children=[
         html.Div(
             className="container",
@@ -125,19 +125,56 @@ horizontal_navbar = html.Div(
                             ]
                         )
                     ]
-                )
+                ),
             ]
         )
     ],
-    id="navbar-container",
-  
+    id="navbar-container"
+)
+sub_navbar = html.Div(
+    className="sub-navbar",
+    style={'background-color': '#508C9B', 'height': '2.5rem', 'width': '100%', 'display': 'flex', 'align-items': 'center'},
+    children=[
+        html.Div(
+            className="container",
+            children=[
+                html.Div(
+                    className="row align-items-center",
+                    children=[
+                        html.Div(
+                            className="col",
+                            children=[
+                                html.Span("Sub Navbar Section", className="font-weight-bold", style={'color': '#ffffff'}),
+                            ]
+                        ),
+                        html.Div(
+                            className="col",
+                            style={'display': 'flex', 'justify-content': 'flex-end'},
+                            children=[
+                                html.Div(
+                                    className="playground-icon",
+                                    children=[
+                                        html.A(
+                                            href="/playground/analytics",
+                                            className="nav-link",
+                                            children="PLAYGROUND",
+                                            style={'color': '#ffffff', 'text-decoration': 'none'}
+                                        ),
+                                    ]
+                                ),
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
+    ]
 )
 
 
-playground_content = p_analytics.content
-analytics_content = analytics.content
 
 
+content = p_analytics.content
 
 # Landing page layout
 landing_page_layout = html.Div(
@@ -153,14 +190,13 @@ landing_page_layout = html.Div(
     style={'textAlign': 'center', 'padding': '50px'}
 )
 
-content = landing_page_layout
-
 # App layout
 app.layout = html.Div([
     dcc.Location(id="url"),
     sidebar,
     html.Div(horizontal_navbar),
-    html.Div(analytics_content),
+    html.Div(sub_navbar),
+    html.Div(content),
 ])
 
 # Callback to toggle collapse on sub-menu items
@@ -204,12 +240,8 @@ def update_card_content(pathname):
 def display_page(pathname):
     if pathname == "/":
         return landing_page_layout
-    elif pathname == '/analytics':
-        return analytics_content
-    elif pathname == '/playground/analtics':
-        return playground_content
     else:
-        return html.Div([html.P("updating.......soon")])
+        return content
 
 # Callback to toggle navbar visibility
 @app.callback(
@@ -240,98 +272,65 @@ def toggle_modal(edit_clicks, close_clicks, is_open):
             return False
     return is_open
 
-# Callback to update ag-grid-table based on filter tab submission
-@app.callback(
-    [Output("ag-grid-table", "rowData"),
-     Output("ag-grid-table", "columnDefs")],
-    [Input("submit-filters-button", "n_clicks")],
-    [State("table-dropdown-filter", "value"),
-     State({"type": "column-dropdown-filter", "index": ALL}, "value"),
-     State({"type": "condition-dropdown-filter", "index": ALL}, "value"),
-     State({"type": "value-input-filter", "index": ALL}, "value")],
-    prevent_initial_call=True
-)
-def update_ag_grid_on_submit(filters_clicks, selected_table, columns, conditions, values):
-    if not all([filters_clicks, selected_table, columns, conditions, values]):
-        return dash.no_update, dash.no_update
-
-    # Generate SQL query
-    where_clauses = []
-    for col, cond, val in zip(columns, conditions, values):
-        if col and cond and val:
-            where_clauses.append(f"{col} {cond} '{val}'")
-    
-    where_clause = " AND ".join(where_clauses)
-    query = f"SELECT * FROM {selected_table} WHERE {where_clause};"
-
-    # Run the query and fetch results from the database
-    df = pd.read_sql(query, conn)
-    row_data = df.to_dict("records")
-    column_defs = [{'field': col, 'sortable': True} for col in df.columns]
-    return row_data, column_defs
-
-
 # @app.callback(
 #     [Output("ag-grid-table", "rowData"),
 #      Output("ag-grid-table", "columnDefs")],
-#     [Input("submit-filters-button", "n_clicks"),
-#      Input("join-submit-button", "n_clicks")],
-#     [State("table-dropdown-filter", "value"),
-#      State({"type": "column-dropdown-filter", "index": ALL}, "value"),
-#      State({"type": "condition-dropdown-filter", "index": ALL}, "value"),
-#      State({"type": "value-input-filter", "index": ALL}, "value"),
-#      State("table-dropdown-join-1", "value"),
-#      State("table-dropdown-join-2", "value"),
-#      State("join-operation-dropdown", "value"),
-#      State("column-dropdown-join-1", "value"),
-#      State("column-dropdown-join-2", "value"),
-#      State("condition-dropdown-join", "value")],
+#     [Input("submit-query-button", "n_clicks"),
+#      Input("submit-filters-button", "n_clicks")],
+#     [State("query-textarea", "value"),
+#      State("table-dropdown-filter", "value"),
+#      State("filter-rows-container", "children")],
 #     prevent_initial_call=True
 # )
-# def update_ag_grid_table(filters_clicks, join_clicks, selected_table_filter, columns_filter, conditions_filter, values_filter,
-#                          table_join1, table_join2, join_type, column_join1, column_join2, condition_join):
+# def update_ag_grid_on_submit(query_n_clicks, filter_n_clicks, new_query, selected_table, filter_rows):
 #     ctx = dash.callback_context
-
 #     if not ctx.triggered:
-#         raise dash.exceptions.PreventUpdate
-    
-#     print("*********************")
+#         return dash.no_update, dash.no_update
 
-#     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+#     trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-#     if triggered_id == "submit-filters-button" and filters_clicks:
-#         if not all([selected_table_filter, columns_filter, conditions_filter, values_filter]):
-#             return dash.no_update, dash.no_update
+#     if trigger_id == "submit-query-button" and new_query:
+#         print("Query Button Triggered")
+#         print(new_query)  # Print the new query to the console
+#         df = p_analytics.update_ag_grid(new_query)
+#         print(df.head())
+#         row_data = df.to_dict("records")
+#         column_defs = [{'field': col, 'sortable': True} for col in df.columns]
+#         return row_data, column_defs
 
-#         # Generate SQL query for filters
-#         where_clauses = []
-#         for col, cond, val in zip(columns_filter, conditions_filter, values_filter):
-#             if col and cond and val:
-#                 where_clauses.append(f"{col} {cond} '{val}'")
-        
-#         where_clause = " AND ".join(where_clauses)
-#         query = f"SELECT * FROM {selected_table_filter} WHERE {where_clause};"
+#     elif trigger_id == "submit-filters-button" and selected_table:
+#         # Construct the query based on the filters
+#         query = f"SELECT * FROM {selected_table} WHERE "
+#         conditions = []
 
-#     elif triggered_id == "join-submit-button" and join_clicks:
-#         if not all([table_join1, table_join2, join_type, column_join1, column_join2, condition_join]):
-#             return dash.no_update, dash.no_update
+#         for row in filter_rows:
+#             row_id = row["props"]["id"]["index"]
+#             column = row["props"]["children"][0]["props"]["children"]["props"]["value"]
+#             condition = row["props"]["children"][1]["props"]["children"]["props"]["value"]
+#             value = row["props"]["children"][2]["props"]["children"]["props"]["value"]
+#             print(f"Row {row_id}: column={column}, condition={condition}, value={value}")
 
-#         # Generate SQL query for join operation
-#         query = f"SELECT * FROM {table_join1} {join_type} {table_join2} ON {table_join1}.{column_join1} {condition_join} {table_join2}.{column_join2};"
+#             if column and condition and value:
+#                 conditions.append(f"{column} {condition} '{value}'")
 
-#     # Run the query and fetch results from the database
-#     df = pd.read_sql(query, conn)
-#     row_data = df.to_dict("records")
-#     column_defs = [{'field': col, 'sortable': True} for col in df.columns]
-#     return row_data, column_defs
+#         print(f"Conditions: {conditions}")
+#         if conditions:
+#             query += " AND ".join(conditions)
+#         else:
+#             query = f"SELECT * FROM {selected_table}"  # Fallback query if no conditions are provided
+
+#         # Execute the query and get the data
+#         print(f"Constructed Query: {query}")
+#         df = p_analytics.update_ag_grid(query)  # Replace with your actual query execution function
+
+#         row_data = df.to_dict("records")
+#         column_defs = [{'field': col, 'sortable': True} for col in df.columns]
+
+#         return row_data, column_defs
+
+#     return dash.no_update, dash.no_update
 
 
-
-
-
-
-
-    
 
 
 
@@ -506,7 +505,7 @@ def render_tab_content(active_tab):
             dbc.Row(id='additional-dropdowns-container'),  # Container for additional dropdown rows
             dbc.Row([
                 dbc.Col(
-                    dbc.Button("Submit", id="join-submit-button", color="primary", className="mt-2"),
+                    dbc.Button("Submit", id="join-submit-button", color="warning", className="mt-2"),
                     width={"size": 2, "offset": 10}
                 )
             ]),
@@ -539,7 +538,8 @@ def set_columns_dropdown_join2(selected_table):
         return get_columns(selected_table)
     return []
 
-# Callback to manage filter rows dynamically (filter tab)
+
+
 @app.callback(
     Output("filter-rows-container", "children"),
     [Input("add-filter-button-filter", "n_clicks")],
@@ -594,22 +594,124 @@ def manage_filter_rows(add_clicks, existing_rows, selected_table):
     return existing_rows
 
 
-# @app.callback(
-#     Output("page-content", "children"),
-#     [Input("url", "pathname")]
-# )
-# def display_page(pathname):
-#     if pathname == "/":
-#         return  landing_page_layout
-#     # elif pathname == "/analytics":
-#     #     return analytics_page_content()
-#     # elif pathname == "/playground":
-#     #     return playground_content()
-#     else:
-#         return html.Div([
-#             html.H1("404 - Page not found"),
-#             html.P(f"The requested URL {pathname} was not found on this server.")
-#         ])
+
+@app.callback(
+    [Output("ag-grid-table", "rowData"),
+     Output("ag-grid-table", "columnDefs")],
+    [Input("submit-query-button", "n_clicks"),
+     Input("submit-filters-button", "n_clicks"),
+     Input("join-submit-button", "n_clicks")],
+    [State("query-textarea", "value"),
+     State("table-dropdown-filter", "value"),
+     State("filter-rows-container", "children"),
+     State("table-dropdown-join-11", "value"),
+     State("table-dropdown-join-22", "value"),
+     State("join-operation-dropdown", "value"),
+     State("column-dropdown", "value"),
+     State("condition-dropdown", "value"),
+     State("column-dropdown-2", "value")],
+    prevent_initial_call=True
+)
+def update_ag_grid_on_submit(query_n_clicks, filter_n_clicks, join_n_clicks,
+                             new_query, selected_table, filter_rows,
+                             join_table_1, join_table_2, join_operation,
+                             join_column_1, join_condition, join_column_2):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return dash.no_update, dash.no_update
+
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger_id == "submit-query-button" and new_query:
+        print("Query Button Triggered")
+        print(new_query)  # Print the new query to the console
+        df = p_analytics.update_ag_grid(new_query)
+        print(df.head())
+        row_data = df.to_dict("records")
+        column_defs = [{'field': col, 'sortable': True} for col in df.columns]
+        return row_data, column_defs
+
+    elif trigger_id == "submit-filters-button" and selected_table:
+        print(88888888888888888888888888888888888888888888888888888888)
+        # Construct the query based on the filters
+        query = f"SELECT * FROM {selected_table} WHERE "
+        conditions = []
+
+        for row in filter_rows:
+            row_id = row["props"]["id"]["index"]
+            column = row["props"]["children"][0]["props"]["children"]["props"]["value"]
+            condition = row["props"]["children"][1]["props"]["children"]["props"]["value"]
+            value = row["props"]["children"][2]["props"]["children"]["props"]["value"]
+            print(f"Row {row_id}: column={column}, condition={condition}, value={value}")
+
+            if column and condition and value:
+                conditions.append(f"{column} {condition} '{value}'")
+
+        print(f"Conditions: {conditions}")
+        if conditions:
+            query += " AND ".join(conditions)
+        else:
+            query = f"SELECT * FROM {selected_table}"  # Fallback query if no conditions are provided
+
+        # Execute the query and get the data
+        print(f"Constructed Query: {query}")
+        df = p_analytics.update_ag_grid(query)  # Replace with your actual query execution function
+
+        row_data = df.to_dict("records")
+        column_defs = [{'field': col, 'sortable': True} for col in df.columns]
+
+        return row_data, column_defs
+    
+    if join_n_clicks or trigger_id == "join-submit-button":
+        print("111111111111111111111111111111111111111111111111111111111111111111")
+
+    elif trigger_id == "join-submit-button" and join_table_1 and join_table_2 and join_operation and join_column_1 and join_condition and join_column_2:
+        print(99999999999999999999999999999999999999999999999999999999999999)
+        # Construct the join query
+        query = f"SELECT * FROM {join_table_1} {join_operation} {join_table_2} ON {join_table_1}.{join_column_1} {join_condition} {join_table_2}.{join_column_2}"
+        
+        print(f"Constructed Join Query: {query}")
+        df = p_analytics.update_ag_grid(query)  # Replace with your actual query execution function
+
+        row_data = df.to_dict("records")
+        column_defs = [{'field': col, 'sortable': True} for col in df.columns]
+
+        return row_data, column_defs
+
+    return dash.no_update, dash.no_update
+
+
+
+@app.callback(
+    Output("offcanvas", "is_open"),
+    Input("code-button", "n_clicks"),
+    [State("offcanvas", "is_open")]
+)
+def toggle_offcanvas(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output('output-div', 'children'),
+    Input('execute-button', 'n_clicks'),
+    State('code-editor', 'value')
+)
+def execute_code(n_clicks, code):
+    import requests
+    if n_clicks:
+        response = requests.post('http://127.0.0.1:5000/execute_python', json={'code': code})
+        result = response.json().get('result', 'No result returned')
+        return result
+    return ""
+
+
+
+
+
+
+
+
 
 
 
